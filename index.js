@@ -31,10 +31,7 @@ app.use(
   })
 );
 
-mongoose.connect(
-  "mongodb+srv://amit786:6baGJ5rTtCxuf7x9@cluster0.cfyuqjy.mongodb.net/?retryWrites=true&w=majority",
-  { useNewUrlParser: true }
-);
+mongoose.connect(process.env.MONGOpass, { useNewUrlParser: true });
 
 const userSchema = new mongoose.Schema({
   name: String,
