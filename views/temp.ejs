@@ -1,0 +1,57 @@
+<%- include('header') -%> <%- include('navbar') -%>
+
+<div
+  style="
+    margin-top: 5%;
+    margin-bottom: 4%;
+    margin-left: 8%;
+    margin-right: 8%;
+    text-align: center;
+    color: red;
+    font-size: x-large;
+    font-weight: bolder;
+  "
+>
+  Dont panic, <%= userName %> !
+</div>
+<div
+  style="
+    margin-left: 8%;
+    margin-right: 8%;
+    text-align: center;
+    margin-bottom: 5%;
+    color: #49a0ae;
+    font-size: xx-large;
+    font-weight: bold;
+  "
+>
+  Our Team Will Contact You in 5 min
+</div>
+
+<div class="container">
+  <div class="form-group">
+    <input
+      type="text"
+      id="source"
+      class="form-control"
+      placeholder="Source Location"
+    />
+  </div>
+  <div class="form-group">
+    <input
+      type="text"
+      id="dest"
+      class="form-control"
+      placeholder="Destination Location"
+    />
+  </div>
+
+  <button class="btn btn-primary" onclick="calcRoute()">Get Directions</button>
+  <button class="btn btn-success" onclick="startTracking()">
+    Start Tracking
+  </button>
+
+  <div id="map" style="height: 500px; width: 100%"></div>
+</div>
+
+<%- include('contact') -%> <%- include('footer') -%>

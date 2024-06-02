@@ -8,6 +8,8 @@ const axios = require("axios");
 const http = require("https");
 const State = require("country-state-city").State;
 const { Vonage } = require("@vonage/server-sdk");
+const data = require("./data.js");
+// const Distance = require("distance.py");
 
 const { City } = require("country-state-city");
 
@@ -64,8 +66,18 @@ const RegisteredHospital = new mongoose.Schema({
 });
 
 const hospitallist = mongoose.model("hospitallist", RegisteredHospital);
+// console.log(data);
+// hospitallist
+//   .insertMany(data)
+//   .then(() => {
+//     console.log("Data inserted successfully");
+//   })
+//   .catch((error) => {
+//     console.error("Error inserting data:", error);
+//   });
 
 const user = mongoose.model("user", userSchema);
+// const distance = Distance.create();
 
 const vonage = new Vonage({
   apiKey: process.env.VONAGE_API_KEY,
@@ -92,6 +104,9 @@ app.get("/book", (req, res) => {
   res.render("bookNow");
 });
 
+// book -> verify -> location -> hospital -> track -> status
+
+// Mail APi is working Great for sending mail to user and then to company/hospital
 app.post("/message", (req, res) => {
   // Extract data from the request body
   const name = req.body.name;
@@ -167,6 +182,17 @@ app.post("/message", (req, res) => {
   });
 });
 
+// Mail APi is working Great for sending mail to user and then to company/hospital
+app.post("/messageto", (req, res) => {
+  // Extract data from the request body
+  const name = req.body.name;
+  const email = req.body.email;
+  const msg = req.body.msg;
+
+  // Create a nodemailer transporter
+});
+
+//working with the vonage api correct for one email and phone number we can use it by 29 times
 app.post("/book", (req, res) => {
   var number = req.body.phone;
   var username = req.body.Name;
@@ -217,74 +243,77 @@ app.post("/book", (req, res) => {
   }
 });
 
-// app.post("/verify", (req, res) => {
-//   var userName = req.body.userName;
-//   var phoneNumber = req.body.phoneNumber;
-//   var enterCode = req.body.code;
-//   var code = req.body.realCode;
-//   var count = 0;
-//   if (enterCode == code) {
-//     var allState = State.getStatesOfCountry("IN");
-//     var allCities = {};
-//     for (var i = 0; i < allState.length; i++) {
-//       var city = City.getCitiesOfState("IN", allState[i].isoCode);
-//       allCities[allState[i].name] = city;
-//     }
-//     var allCitiesString = JSON.stringify(allCities);
-//     res.render("location", {
-//       allState: allState,
-//       allCitiesString: allCitiesString,
-//       userName: userName,
-//       phoneNumber: phoneNumber,
-//     });
-//   } else {
-//     count++;
-//     if (count == 3) {
-//       res.redirect("/book");
-//     } else {
-//       res.render("verify", { Username: userName, number: phoneNumber });
-//     }
-//   }
-// });
-app.post("/verify", async (req, res) => {
-  try {
-    // ... (existing code)
-    var userName = req.body.userName;
-    var phoneNumber = req.body.phoneNumber;
-    var enterCode = req.body.code;
-    var code = req.body.realCode;
-    var count = 0;
-    if (enterCode === code) {
-      const allState = await State.getStatesOfCountry("IN");
-
-      // Ensure that allState is an array and has at least one state
-      if (Array.isArray(allState) && allState.length > 0) {
-        // Get the cities for the first state in the list
-        const stateIsoCode = allState[0].isoCode;
-        const cities = await City.getCitiesOfState("IN", stateIsoCode);
-
-        // Convert cities to JSON string
-        const allCitiesString = JSON.stringify(cities);
-
-        // Render the "location" page with the state and cities
-        res.render("location", {
-          allState: allState,
-          allCitiesString: cities, // Pass allCitiesString as a local variable
-          userName: userName,
-          phoneNumber: phoneNumber,
-        });
-      } else {
-        console.log("No states found for the country.");
-        res.render("error", { error: "No states found for the country" });
-      }
-    } else {
-      // ... (existing code)
+app.post("/verify", (req, res) => {
+  var userName = req.body.userName;
+  var phoneNumber = req.body.phoneNumber;
+  var enterCode = req.body.code;
+  var code = req.body.realCode;
+  var count = 0;
+  if (enterCode == code) {
+    var allState = State.getStatesOfCountry("IN");
+    var allCities = {};
+    for (var i = 0; i < allState.length; i++) {
+      var city = City.getCitiesOfState("IN", allState[i].isoCode);
+      allCities[allState[i].name] = city;
     }
-  } catch (error) {
-    console.error("Error in /verify route:", error);
-    res.render("error", { error: "Internal server error" });
+    var allCitiesString = JSON.stringify(allCities);
+
+    res.render("location", {
+      allState: allState,
+      allCitiesString: allCitiesString,
+      userName: userName,
+      phoneNumber: phoneNumber,
+    });
+  } else {
+    count++;
+    if (count == 3) {
+      res.redirect("/book");
+    } else {
+      res.render("verify", { Username: userName, number: phoneNumber });
+    }
   }
 });
+// app.post("/verify", async (req, res) => {
+//   try {
+//     // ... (existing code)
+//     var userName = req.body.userName;
+//     var phoneNumber = req.body.phoneNumber;
+//     var enterCode = req.body.code;
+//     var code = req.body.realCode;
+//     var count = 0;
+//     if (enterCode === code) {
+//       const allState = await State.getStatesOfCountry("IN");
+
+//       // Ensure that allState is an array and has at least one state
+//       if (Array.isArray(allState) && allState.length > 0) {
+//         // Get the cities for the first state in the list
+//         const stateIsoCode = allState[0].isoCode;
+//         const cities = await City.getCitiesOfState("IN", stateIsoCode);
+
+//         // Convert cities to JSON string
+//         const allCitiesString = JSON.stringify(cities);
+
+//         // Render the "location" page with the state and cities
+//         res.render("location", {
+//           allState: allState,
+//           allCitiesString: cities, // Pass allCitiesString as a local variable
+//           userName: userName,
+//           phoneNumber: phoneNumber,
+//         });
+//       } else {
+//         console.log("No states found for the country.");
+//         res.render("error", { error: "No states found for the country" });
+//       }
+//     } else {
+//       // ... (existing code)
+//     }
+//   } catch (error) {
+//     console.error("Error in /verify route:", error);
+//     res.render("error", { error: "Internal server error" });
+//   }
+// });
+
+//i think location is also working
 
 app.post("/location", async (req, res) => {
   try {
@@ -387,13 +416,14 @@ app.post("/location", async (req, res) => {
 
       apiRequest.end();
     }
-
+    console.log("calling hospitalcall function");
     hospitalCall();
   } catch (error) {
     console.log("An error occured: " + error);
   }
 });
 
+// hospital api is completely working
 app.post("/hospital", (req, res) => {
   var hospitalName = req.body.hospitalName;
   var hospitalAddress = req.body.hospitalAddress;
@@ -435,19 +465,47 @@ app.post("/hospital", (req, res) => {
 var assigndriverName = "Not Assigned Yet";
 var assigndriverNum = "Not Assigned Yet";
 var assigndriverId = "Not Assigned Yet";
+
+// i think track is also working
 app.post("/track", async (req, res) => {
-  var userName = req.body.userName;
-  var phoneNumber = req.body.phoneNumber;
   var hospitalName = req.body.hospitalName;
   var hospitalAddress = req.body.hospitalAddress;
+  var userName = req.body.userName;
+  var phoneNumber = req.body.phoneNumber;
   var ambuTrack;
   var patientId;
+
+  hospitallist
+    .findOneAndUpdate(
+      { hospitalName: hospitalName, hospitalAddress: hospitalAddress },
+      {
+        $push: {
+          patient: {
+            patientName: userName,
+            patientNum: phoneNumber,
+            patientStatus: "pending",
+            ambuTrack: "Booking Confirmed",
+          },
+        },
+      },
+      { new: true }
+    )
+    .then((updatedHospital) => {
+      if (!updatedHospital) {
+        res.send("Hospital is not registered");
+      }
+    })
+    .catch((error) => {
+      console.log("Error updating pending case:", error);
+      res.send("Error updating pending case");
+    });
 
   try {
     const hospital = await hospitallist.findOne({
       hospitalName: hospitalName,
       hospitalAddress: hospitalAddress,
     });
+    console.log(hospital);
 
     if (!hospital) {
       console.log("Hospital not found");
@@ -456,23 +514,27 @@ app.post("/track", async (req, res) => {
         (p) => p.patientName === userName && p.patientNum === phoneNumber
       );
 
+      console.log(patient);
+
       if (!patient) {
         console.log("Patient not found");
       } else {
         ambuTrack = patient.ambuTrack;
         patientId = patient._id.toString();
+        console.log(ambuTrack);
+        // if (ambuTrack === "ambulance assigned") {
 
-        if (ambuTrack === "ambulance assigned") {
+        if (ambuTrack === "Booking Confirmed") {
           const h1 = await hospitallist.findOne({
             hospitalName: hospitalName,
             hospitalAddress: hospitalAddress,
           });
-
-          if (!h1) {
+          console.log(`h1: ${h1}`);
+          if (!h1._id) {
             console.log("Hospital is not found");
           } else {
-            const driver = h1.driver.find((d) => d.patientAssign === patientId);
-
+            const driver = h1.driver.find((d) => d.patientAssign === "");
+            console.log(driver);
             if (!driver) {
               console.log("Driver not found");
             } else {
@@ -485,6 +547,57 @@ app.post("/track", async (req, res) => {
       }
     }
 
+    //call message post request with username , driver email, msg= "Patient request is coming with phone no user.phone number"
+
+    const Name = userName;
+    const Email = "amitbhardwaj2609@gmail.com";
+    const msg = `Patient request is coming with phone no ${phoneNumber}`;
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.NODEMAILER_EMAIL,
+        pass: process.env.NODEMAILER_PASS,
+      },
+      port: 465,
+      host: "smtp.gmail.com",
+    });
+
+    // Define mail options for sending emails to the user
+    const mailOption1 = {
+      from: process.env.NODEMAILER_EMAIL,
+      to: `${Email}`,
+      subject: "Patient is Coming by AmbuTrack..",
+      text: `A Patient is coming with the following details:- \n Name:- ${Name} \n Phone Number:- ${phoneNumber} \n Email:- ${Email} \n Message:- ${msg}`,
+    };
+
+    // Define mail options for sending emails to a second email address
+    const mailOption2 = {
+      from: process.env.NODEMAILER_EMAIL,
+      to: process.env.SECOND_EMAIL,
+      subject: `Patient is Coming by AmbuTrack..`,
+      text: `A Patient is coming with the following details:- \n Name:- ${Name} \n Phone Number:- ${phoneNumber} \n Email:- ${Email} \n Message:- ${msg}`,
+    };
+
+    // Send the first email to the user
+    transporter.sendMail(mailOption1, (error, info) => {
+      if (error) {
+        console.log(error);
+        res.send("error sending email");
+      } else {
+        // If the first email is sent successfully, send the second email
+        transporter.sendMail(mailOption2, (error, info) => {
+          if (error) {
+            console.log(error);
+            res.send("error sending email");
+          } else {
+            console.log("both email sent successfully");
+            res.status(200);
+          }
+        });
+      }
+    });
+
     res.render("status", {
       userName: userName,
       phoneNumber: phoneNumber,
@@ -494,6 +607,7 @@ app.post("/track", async (req, res) => {
       driverName: assigndriverName,
       driverNum: assigndriverNum,
       driverId: assigndriverId,
+      deslocation: hospitalAddress,
     });
   } catch (err) {
     res.send(err);
